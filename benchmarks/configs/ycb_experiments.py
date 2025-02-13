@@ -368,6 +368,7 @@ randrot_10distinctobj_surf_agent.update(
         object_init_sampler=RandomRotationObjectInitializer(),
     ),
 )
+randrot_10distinctobj_surf_agent["logging_config"].wandb_handlers = []
 
 randrot_noise_10distinctobj_5lms_dist_agent = copy.deepcopy(
     randrot_noise_10distinctobj_dist_agent
