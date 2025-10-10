@@ -54,10 +54,9 @@ ALLOWED_CSS_PROPERTIES = {"width", "height"}
 class HtmlGenerator:
     def __init__(self, output_dir: str = None):
         self.output_dir = output_dir or tempfile.mkdtemp(prefix="docs_")
-        self.docs_dir = os.path.join(self.output_dir, "docs")
         self.assets_dir = os.path.join(self.output_dir, "assets")
         self.css_dir = os.path.join(self.output_dir, "css")
-        os.makedirs(self.docs_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.assets_dir, exist_ok=True)
         os.makedirs(self.css_dir, exist_ok=True)
         logging.info(f"{GREEN}Output directory: {self.output_dir}{RESET}")
@@ -73,6 +72,7 @@ class HtmlGenerator:
         body = self.convert_youtube_videos(body)
         body = self.highlight_code_blocks(body)
         body = self.markdown_to_html(body)
+        body = self.add_heading_anchors(body)
         return body
 
     def markdown_to_html(self, markdown_text: str) -> str:
@@ -190,7 +190,7 @@ class HtmlGenerator:
             image_filename = match.group(2)
             if image_filename in IGNORE_IMAGES:
                 return match.group(0)
-            return f"../assets/{image_filename}"
+            return f"assets/{image_filename}"
 
         img_tags = re.finditer(r'<img\s+[^>]*src="([^"]*)"[^>]*>', new_body)
         for match in img_tags:
@@ -201,7 +201,7 @@ class HtmlGenerator:
                 if image_path:
                     image_filename = image_path.group(2)
                     if image_filename not in IGNORE_IMAGES:
-                        new_src = f"../assets/{image_filename}"
+                        new_src = f"assets/{image_filename}"
                         new_img_tag = img_tag.replace(src, new_src)
                         new_body = new_body.replace(img_tag, new_img_tag)
 
@@ -333,6 +333,21 @@ class HtmlGenerator:
 
         return regex_markdown_snippet.sub(replace_match, body)
 
+    def add_heading_anchors(self, html_content: str) -> str:
+        def add_anchor(match):
+            tag = match.group(1)
+            content = match.group(2)
+            anchor_id = re.sub(r"[^\w\s-]", "", content.lower())
+            anchor_id = re.sub(r"[\s_]+", "-", anchor_id)
+            return (
+                f'<{tag} id="{anchor_id}">'
+                f'<a href="#{anchor_id}" class="heading-link">{content}</a>'
+                f"</{tag}>"
+            )
+
+        pattern = r"<(h[1-6])>(.*?)</h[1-6]>"
+        return re.sub(pattern, add_anchor, html_content)
+
     def generate_navigation_html(
         self, hierarchy: list, current_slug: str = ""
     ) -> str:
@@ -348,7 +363,7 @@ class HtmlGenerator:
             nav_html += '<ul class="nav-sublist">'
 
             for doc in category.get("children", []):
-                nav_html += self._generate_nav_item(doc, current_slug, 0)
+                nav_html += self._generate_nav_item(doc, current_slug, 0, True)
 
             nav_html += "</ul></li>"
 
@@ -356,28 +371,37 @@ class HtmlGenerator:
         return nav_html
 
     def _generate_nav_item(
-        self, doc: dict, current_slug: str, level: int
+        self, doc: dict, current_slug: str, level: int, is_first_level: bool = False
     ) -> str:
         slug = doc["slug"]
         is_active = slug == current_slug
+        has_children = bool(doc.get("children"))
         active_class = ' class="active"' if is_active else ""
         indent_class = f"indent-{level}" if level > 0 else ""
 
         html_content = f'<li class="{indent_class}">'
         title_text = slug.replace("-", " ").title()
         escaped_title = html_module.escape(title_text)
-        html_content += (
-            f'<a href="{slug}.html"{active_class}>{escaped_title}</a>'
-        )
 
-        if doc.get("children"):
-            html_content += '<ul class="nav-sublist">'
+        if has_children:
+            expand_icon = '<span class="expand-icon">▶</span>'
+            html_content += (
+                f'<div class="nav-item-with-children">'
+                f"{expand_icon}"
+                f'<a href="{slug}.html"{active_class}>{escaped_title}</a>'
+                f"</div>"
+            )
+            collapsed_class = "" if is_first_level else " collapsed"
+            sublist_class = f'<ul class="nav-sublist{collapsed_class}">'
+            html_content += sublist_class
             for child in doc["children"]:
                 child_item = self._generate_nav_item(
-                    child, current_slug, level + 1
+                    child, current_slug, level + 1, False
                 )
                 html_content += child_item
             html_content += "</ul>"
+        else:
+            html_content += f'<a href="{slug}.html"{active_class}>{escaped_title}</a>'
 
         html_content += "</li>"
         return html_content
@@ -404,8 +428,8 @@ class HtmlGenerator:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{html_module.escape(title)} - Documentation</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/highlight.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/highlight.css">
 </head>
 <body>
     {navigation}
@@ -419,7 +443,7 @@ class HtmlGenerator:
             <p>Thousand Brains Project Documentation</p>
         </footer>
     </main>
-    <script src="../js/main.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>"""
 
@@ -447,71 +471,131 @@ Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: #2c3e50;
     color: #ecf0f1;
     overflow-y: auto;
-    padding: 20px 0;
+    padding: 0;
     z-index: 1000;
 }
 
 .nav-header {
-    font-size: 1.5rem;
-    font-weight: bold;
-    padding: 0 20px 20px;
-    border-bottom: 2px solid #34495e;
-    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 24px 20px;
+    background-color: #34495e;
+    margin: 0;
+    border-bottom: 1px solid #1a252f;
 }
 
 .nav-list {
     list-style: none;
+    padding: 12px 0;
 }
 
 .nav-category {
-    margin-bottom: 15px;
+    margin-bottom: 24px;
 }
 
 .category-title {
-    font-weight: bold;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    color: #95a5a6;
-    padding: 8px 20px;
-    letter-spacing: 0.5px;
+    color: #7f8c8d;
+    padding: 12px 20px 8px;
+    letter-spacing: 1px;
 }
 
 .nav-sublist {
     list-style: none;
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
 }
 
-.nav-sublist li {
-    margin: 2px 0;
+.nav-sublist.collapsed {
+    max-height: 0;
 }
 
-.nav-sublist a {
+.nav-sublist > li {
+    margin: 0;
+}
+
+.nav-item-with-children {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nav-item-with-children:hover {
+    background-color: rgba(52, 73, 94, 0.5);
+}
+
+.expand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    transition: transform 0.2s ease;
+    font-size: 0.6rem;
+    color: #95a5a6;
+    flex-shrink: 0;
+}
+
+.nav-item-with-children.expanded .expand-icon {
+    transform: rotate(90deg);
+}
+
+.nav-item-with-children a {
+    flex: 1;
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0;
+}
+
+.nav-item-with-children a:hover {
+    color: #3498db;
+}
+
+.nav-sublist > li > a {
     display: block;
-    padding: 8px 20px;
+    padding: 10px 20px;
     color: #ecf0f1;
     text-decoration: none;
     transition: all 0.2s;
     border-left: 3px solid transparent;
+    font-size: 0.95rem;
 }
 
-.nav-sublist a:hover {
+.nav-sublist > li > a:hover {
+    background-color: rgba(52, 73, 94, 0.5);
+    border-left-color: #3498db;
+    color: #fff;
+}
+
+.nav-sublist > li > a.active {
     background-color: #34495e;
     border-left-color: #3498db;
+    font-weight: 600;
+    color: #fff;
 }
 
-.nav-sublist a.active {
-    background-color: #34495e;
-    border-left-color: #3498db;
-    font-weight: bold;
-}
-
-.nav-sublist .indent-1 a {
-    padding-left: 35px;
+.nav-sublist .indent-1 > a {
+    padding-left: 48px;
     font-size: 0.9rem;
 }
 
-.nav-sublist .indent-2 a {
-    padding-left: 50px;
+.nav-sublist .indent-2 > a {
+    padding-left: 64px;
     font-size: 0.85rem;
+}
+
+.nav-sublist .indent-1 .nav-item-with-children {
+    padding-left: 48px;
+}
+
+.nav-sublist .indent-2 .nav-item-with-children {
+    padding-left: 64px;
 }
 
 .content {
@@ -572,6 +656,15 @@ article h4 {
     color: #34495e;
 }
 
+.heading-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.heading-link:hover {
+    color: #3498db;
+}
+
 article p {
     margin-bottom: 1rem;
 }
@@ -616,6 +709,25 @@ article pre code {
     background-color: transparent;
     padding: 0;
     color: inherit;
+}
+
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    background-color: #34495e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.copy-button:hover {
+    opacity: 1;
 }
 
 article table {
@@ -754,12 +866,37 @@ blockquote {
 
     def generate_javascript(self) -> str:
         return """document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('.nav-sublist a');
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            links.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
+    const navItemsWithChildren = document.querySelectorAll('.nav-item-with-children');
+    navItemsWithChildren.forEach(item => {
+        const sublist = item.parentElement.querySelector('.nav-sublist');
+        const isExpanded = !sublist.classList.contains('collapsed');
+        if (isExpanded) {
+            item.classList.add('expanded');
+        }
+
+        item.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+
+            this.classList.toggle('expanded');
+            const sublist = this.parentElement.querySelector('.nav-sublist');
+            if (sublist) {
+                if (sublist.classList.contains('collapsed')) {
+                    sublist.classList.remove('collapsed');
+                    sublist.style.maxHeight = sublist.scrollHeight + 'px';
+                } else {
+                    sublist.style.maxHeight = '0';
+                    sublist.classList.add('collapsed');
+                }
+            }
         });
+    });
+
+    document.querySelectorAll('.nav-sublist:not(.collapsed)').forEach(list => {
+        list.style.maxHeight = list.scrollHeight + 'px';
     });
 
     document.querySelectorAll('pre code').forEach((block) => {
@@ -854,27 +991,69 @@ blockquote {
             title, content, navigation, breadcrumbs
         )
 
-        output_file = os.path.join(self.docs_dir, f"{doc['slug']}.html")
+        output_file = os.path.join(self.output_dir, f"{doc['slug']}.html")
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         logging.info(f"{WHITE}Generated: {doc['slug']}.html{RESET}")
         return output_file
 
-    def generate_index(self, hierarchy: list):
-        content = """
-        <div style="text-align: center; padding: 40px 0;">
-            <h2>Welcome to the Documentation</h2>
-            <p>Select a topic from the navigation to get started.</p>
-        </div>
-        """
+    def generate_index_from_first_doc(self, hierarchy: list, file_path: str) -> str:
+        if not hierarchy or not hierarchy[0].get("children"):
+            content = """
+            <div style="text-align: center; padding: 40px 0;">
+                <h2>Welcome to the Documentation</h2>
+                <p>Select a topic from the navigation to get started.</p>
+            </div>
+            """
+            navigation = self.generate_navigation_html(hierarchy, "")
+            html_content = self.generate_page_template("Home", content, navigation)
+            output_file = os.path.join(self.output_dir, "index.html")
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(html_content)
+            logging.info(f"{GREEN}Index page generated{RESET}")
+            return output_file
 
-        navigation = self.generate_navigation_html(hierarchy, "")
-        html_content = self.generate_page_template("Home", content, navigation)
+        first_category = hierarchy[0]
+        first_doc = first_category["children"][0]
+
+        doc_file_path = os.path.join(
+            file_path, first_category["slug"], f"{first_doc['slug']}.md"
+        )
+
+        if not os.path.exists(doc_file_path):
+            logging.error(f"First doc not found: {doc_file_path}")
+            return None
+
+        with open(doc_file_path, "r", encoding="utf-8") as f:
+            raw_content = f.read()
+
+        if raw_content.startswith("---"):
+            _, frontmatter_str, body = raw_content.split("---", 2)
+            frontmatter = yaml.safe_load(frontmatter_str)
+            title = frontmatter.get(
+                "title", first_doc["slug"].replace("-", " ").title()
+            )
+        else:
+            body = raw_content
+            title = first_doc["slug"].replace("-", " ").title()
+
+        content = self.process_markdown(
+            body,
+            os.path.join(file_path, first_category["slug"]),
+            first_doc["slug"],
+        )
+
+        navigation = self.generate_navigation_html(hierarchy, first_doc["slug"])
+
+        html_content = self.generate_page_template(
+            title, content, navigation, [("Home", "index.html")]
+        )
 
         output_file = os.path.join(self.output_dir, "index.html")
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(html_content)
 
-        logging.info(f"{GREEN}Index page generated{RESET}")
+        logging.info(f"{GREEN}Index page generated from first doc{RESET}")
+        return output_file
 

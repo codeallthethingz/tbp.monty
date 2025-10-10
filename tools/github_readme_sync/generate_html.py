@@ -43,7 +43,7 @@ def generate_html_docs(source_dir: str, output_dir: str = None):
             ],
         )
 
-    generator.generate_index(hierarchy)
+    generator.generate_index_from_first_doc(hierarchy, source_dir)
 
     logging.info(
         f"\n{GREEN}HTML documentation generated successfully!{RESET}"
