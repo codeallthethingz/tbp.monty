@@ -363,41 +363,34 @@ class HtmlGenerator:
             nav_html += '<ul class="nav-sublist">'
 
             for doc in category.get("children", []):
-                nav_html += self._generate_nav_item(doc, current_slug, 0, True)
+                nav_html += self._generate_nav_item(doc, current_slug, 0)
 
             nav_html += "</ul></li>"
 
         nav_html += "</ul></nav>"
         return nav_html
 
-    def _generate_nav_item(
-        self, doc: dict, current_slug: str, level: int, is_first_level: bool = False
-    ) -> str:
+    def _generate_nav_item(self, doc: dict, current_slug: str, level: int) -> str:
         slug = doc["slug"]
         is_active = slug == current_slug
         has_children = bool(doc.get("children"))
         active_class = ' class="active"' if is_active else ""
         indent_class = f"indent-{level}" if level > 0 else ""
 
-        html_content = f'<li class="{indent_class}">'
+        html_content = f'<li class="{indent_class}" data-slug="{slug}">'
         title_text = slug.replace("-", " ").title()
         escaped_title = html_module.escape(title_text)
 
         if has_children:
-            expand_icon = '<span class="expand-icon">▶</span>'
             html_content += (
-                f'<div class="nav-item-with-children">'
-                f"{expand_icon}"
-                f'<a href="{slug}.html"{active_class}>{escaped_title}</a>'
-                f"</div>"
+                f'<a href="{slug}.html"{active_class} has-children">'
+                f'<span class="has-children-indicator">› </span>'
+                f"{escaped_title}"
+                f"</a>"
             )
-            collapsed_class = "" if is_first_level else " collapsed"
-            sublist_class = f'<ul class="nav-sublist{collapsed_class}">'
-            html_content += sublist_class
+            html_content += '<ul class="nav-sublist collapsed">'
             for child in doc["children"]:
-                child_item = self._generate_nav_item(
-                    child, current_slug, level + 1, False
-                )
+                child_item = self._generate_nav_item(child, current_slug, level + 1)
                 html_content += child_item
             html_content += "</ul>"
         else:
@@ -497,9 +490,12 @@ Oxygen, Ubuntu, Cantarell, sans-serif;
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
-    color: #7f8c8d;
+    color: #95a5a6;
     padding: 12px 20px 8px;
     letter-spacing: 1px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .nav-sublist {
@@ -514,47 +510,6 @@ Oxygen, Ubuntu, Cantarell, sans-serif;
 
 .nav-sublist > li {
     margin: 0;
-}
-
-.nav-item-with-children {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.nav-item-with-children:hover {
-    background-color: rgba(52, 73, 94, 0.5);
-}
-
-.expand-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    transition: transform 0.2s ease;
-    font-size: 0.6rem;
-    color: #95a5a6;
-    flex-shrink: 0;
-}
-
-.nav-item-with-children.expanded .expand-icon {
-    transform: rotate(90deg);
-}
-
-.nav-item-with-children a {
-    flex: 1;
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 0.95rem;
-    padding: 0;
-}
-
-.nav-item-with-children a:hover {
-    color: #3498db;
 }
 
 .nav-sublist > li > a {
@@ -576,26 +531,36 @@ Oxygen, Ubuntu, Cantarell, sans-serif;
 .nav-sublist > li > a.active {
     background-color: #34495e;
     border-left-color: #3498db;
-    font-weight: 600;
     color: #fff;
 }
 
+.has-children-indicator {
+    color: #7f8c8d;
+    font-size: 0.8rem;
+    margin-left: -16px;
+    margin-right: 4px;
+}
+
+a.has-children {
+    padding-left: 36px;
+}
+
 .nav-sublist .indent-1 > a {
-    padding-left: 48px;
+    padding-left: 40px;
     font-size: 0.9rem;
 }
 
+.nav-sublist .indent-1 > a.has-children {
+    padding-left: 56px;
+}
+
 .nav-sublist .indent-2 > a {
-    padding-left: 64px;
+    padding-left: 60px;
     font-size: 0.85rem;
 }
 
-.nav-sublist .indent-1 .nav-item-with-children {
-    padding-left: 48px;
-}
-
-.nav-sublist .indent-2 .nav-item-with-children {
-    padding-left: 64px;
+.nav-sublist .indent-2 > a.has-children {
+    padding-left: 76px;
 }
 
 .content {
@@ -866,38 +831,34 @@ blockquote {
 
     def generate_javascript(self) -> str:
         return """document.addEventListener('DOMContentLoaded', function() {
-    const navItemsWithChildren = document.querySelectorAll('.nav-item-with-children');
-    navItemsWithChildren.forEach(item => {
-        const sublist = item.parentElement.querySelector('.nav-sublist');
-        const isExpanded = !sublist.classList.contains('collapsed');
-        if (isExpanded) {
-            item.classList.add('expanded');
+    function expandPathToCurrentPage() {
+        const activeLink = document.querySelector('.nav-sublist a.active');
+        if (!activeLink) return;
+
+        let element = activeLink.parentElement;
+        while (element) {
+            if (element.classList.contains('nav-sublist') && element.classList.contains('collapsed')) {
+                element.classList.remove('collapsed');
+                element.style.maxHeight = element.scrollHeight + 'px';
+            }
+            element = element.parentElement;
         }
 
-        item.addEventListener('click', function(e) {
-            if (e.target.tagName === 'A') {
-                return;
-            }
-            e.preventDefault();
-            e.stopPropagation();
+        const activeLi = activeLink.parentElement;
+        const activeSublist = activeLi.querySelector('.nav-sublist');
+        if (activeSublist && activeSublist.classList.contains('collapsed')) {
+            activeSublist.classList.remove('collapsed');
+            activeSublist.style.maxHeight = activeSublist.scrollHeight + 'px';
+        }
 
-            this.classList.toggle('expanded');
-            const sublist = this.parentElement.querySelector('.nav-sublist');
-            if (sublist) {
-                if (sublist.classList.contains('collapsed')) {
-                    sublist.classList.remove('collapsed');
-                    sublist.style.maxHeight = sublist.scrollHeight + 'px';
-                } else {
-                    sublist.style.maxHeight = '0';
-                    sublist.classList.add('collapsed');
-                }
+        setTimeout(() => {
+            if (activeLink.scrollIntoView) {
+                activeLink.scrollIntoView({ block: 'start', behavior: 'auto' });
             }
-        });
-    });
+        }, 100);
+    }
 
-    document.querySelectorAll('.nav-sublist:not(.collapsed)').forEach(list => {
-        list.style.maxHeight = list.scrollHeight + 'px';
-    });
+    expandPathToCurrentPage();
 
     document.querySelectorAll('pre code').forEach((block) => {
         const button = document.createElement('button');
