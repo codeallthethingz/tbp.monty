@@ -91,9 +91,11 @@ github_readme_sync_tool = [
     'pyyaml',
     'python-dotenv',
     'colorama',
+    'markdown',
     'markdown2',
     'python-slugify',
-    'nh3'
+    'nh3',
+    'pygments'
 ]
 print_version_tool = [
     'semver'
