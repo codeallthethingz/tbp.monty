@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function addCopyButtons() {
-        document.querySelectorAll('pre code').forEach((block) => {
-            if (block.parentElement.querySelector('.copy-button')) return;
+        // Handle both plain <pre><code> and Pygments <div class="highlight"><pre>
+        document.querySelectorAll('pre code, div.highlight pre').forEach((block) => {
+            const container = block.closest('pre') || block;
+            if (container.querySelector('.copy-button')) return;
             
             const button = document.createElement('button');
             button.className = 'copy-button';
@@ -34,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.textContent = 'Copy';
                 }, 2000);
             });
-            block.parentElement.style.position = 'relative';
-            block.parentElement.appendChild(button);
+            container.style.position = 'relative';
+            container.appendChild(button);
         });
     }
 

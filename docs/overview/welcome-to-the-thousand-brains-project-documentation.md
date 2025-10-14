@@ -16,24 +16,6 @@ The Monty project incorporates a lot of new concepts and ideas and will require 
 4. 💬 [Discourse Forum](https://thousandbrains.discourse.group/) which is a community forum for discussing the project and a great place for beginners to **get answers to questions**.
 5. ❓ You can also check out our FAQs for the [Thousand Brains Project](./faq-thousand-brains-project.md), and the underlying [Monty algorithms](../how-monty-works/faq-monty.md).
 
-# Mathematical Notation
-
-This documentation supports LaTeX mathematical notation for expressing complex equations and formulas. You can use inline math like \(E = mc^2\) or display equations in blocks:
-
-```latex
-\[
-P(h|o) = \frac{P(o|h) \cdot P(h)}{P(o)}
-\]
-
-\[
-\mathbf{x}_{t+1} = f(\mathbf{x}_t, \mathbf{u}_t) + \mathbf{w}_t
-\]
-
-\[
-J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^{\infty} \gamma^t r_t\right]
-\]
-```
-
 # Section Overview
 
 The documentation is broken into six main sections:

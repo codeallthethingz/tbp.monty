@@ -162,6 +162,28 @@ python -m tools.github_readme_sync.cli check docs
 
 See the [Style Guide](style-guide.md#images) images section for details about creating and referencing images correctly.
 
+# Mathematical Notation
+
+This documentation supports LaTeX mathematical notation for expressing complex equations and formulas. You can use inline math like \(E = mc^2\) or display equations in blocks:
+
+```latex
+\[
+P(h|o) = \frac{P(o|h) \cdot P(h)}{P(o)}
+\]
+
+\[
+\mathbf{x}_{t+1} = f(\mathbf{x}_t, \mathbf{u}_t) + \mathbf{w}_t
+\]
+
+\[
+J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^{\infty} \gamma^t r_t\right]
+\]
+```
+
+The HTML documentation automatically renders LaTeX using MathJax. Use:
+- Inline math: `\(equation\)` 
+- Display math blocks: wrap equations in a `latex` code block with `\[equation\]`
+
 # VS Code Snippets
 
 > [!TIP]
