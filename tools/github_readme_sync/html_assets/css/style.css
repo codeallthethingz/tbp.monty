@@ -388,3 +388,17 @@ blockquote {
     font-style: italic;
 }
 
+.latex-block {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 5px;
+    margin: 1.5rem 0;
+    border-left: 4px solid #9b59b6;
+    overflow-x: auto;
+}
+
+mjx-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+

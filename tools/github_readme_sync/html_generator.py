@@ -62,6 +62,7 @@ class HtmlGenerator:
         body = self.parse_images(body)
         body = self.convert_cloudinary_videos(body)
         body = self.convert_youtube_videos(body)
+        body = self.process_latex_blocks(body)
         body = self.highlight_code_blocks(body)
         body = self.markdown_to_html(body)
         body = self.add_heading_anchors(body)
@@ -243,6 +244,29 @@ class HtmlGenerator:
 
         return REGEX_YOUTUBE_LINK.sub(replace_youtube, markdown_text)
 
+    def process_latex_blocks(self, markdown_text: str) -> str:
+        latex_blocks = []
+
+        def preserve_latex(match):
+            language = match.group(1) or ""
+            code = match.group(2)
+
+            if language.lower() in ["latex", "tex", "math"]:
+                placeholder = f"__LATEX_BLOCK_{len(latex_blocks)}__"
+                latex_blocks.append(code)
+                return placeholder
+
+            return match.group(0)
+
+        result = REGEX_CODE_BLOCK.sub(preserve_latex, markdown_text)
+
+        for i, latex_code in enumerate(latex_blocks):
+            placeholder = f"__LATEX_BLOCK_{i}__"
+            latex_html = f'<div class="latex-block">\n{latex_code}\n</div>'
+            result = result.replace(placeholder, latex_html)
+
+        return result
+
     def insert_markdown_snippet(self, body: str, file_path: str) -> str:
         return insert_snippet_util(body, file_path)
 
@@ -334,6 +358,19 @@ class HtmlGenerator:
     <title>{html_module.escape(title)} - Documentation</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/highlight.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+    window.MathJax = {{
+        tex: {{
+            inlineMath: [['\\\\(', '\\\\)']],
+            displayMath: [['\\\\[', '\\\\]']],
+            processEscapes: true
+        }},
+        svg: {{
+            fontCache: 'global'
+        }}
+    }};
+    </script>
 </head>
 <body>
     {navigation}

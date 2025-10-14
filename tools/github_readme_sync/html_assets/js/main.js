@@ -116,6 +116,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateActiveNavState(pathname);
                 addCopyButtons();
                 
+                if (window.MathJax) {
+                    window.MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+                }
+                
                 const urlObj = new URL(url, window.location.origin);
                 if (urlObj.hash) {
                     setTimeout(() => {

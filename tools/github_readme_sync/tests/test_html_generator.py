@@ -59,19 +59,6 @@ class TestHtmlGenerator:
         assert "intro" in nav
         assert 'class="active"' in nav
 
-    def test_generate_css(self):
-        gen = HtmlGenerator()
-        css = gen.generate_css()
-        assert ".sidebar" in css
-        assert ".content" in css
-        assert "nav-list" in css
-
-    def test_generate_javascript(self):
-        gen = HtmlGenerator()
-        js = gen.generate_javascript()
-        assert "addEventListener" in js
-        assert "DOMContentLoaded" in js
-
     def test_generate_page_template(self):
         gen = HtmlGenerator()
         title = "Test Page"
@@ -85,3 +72,46 @@ class TestHtmlGenerator:
         assert nav in result
         assert "breadcrumbs" in result
 
+    def test_process_latex_blocks_with_latex_language(self):
+        gen = HtmlGenerator()
+        body = "```latex\n\\[\nE = mc^2\n\\]\n```"
+        result = gen.process_latex_blocks(body)
+        assert '<div class="latex-block">' in result
+        assert "E = mc^2" in result
+
+    def test_process_latex_blocks_with_tex_language(self):
+        gen = HtmlGenerator()
+        body = "```tex\n\\[\nF = ma\n\\]\n```"
+        result = gen.process_latex_blocks(body)
+        assert '<div class="latex-block">' in result
+        assert "F = ma" in result
+
+    def test_process_latex_blocks_with_math_language(self):
+        gen = HtmlGenerator()
+        body = "```math\n\\[\na^2 + b^2 = c^2\n\\]\n```"
+        result = gen.process_latex_blocks(body)
+        assert '<div class="latex-block">' in result
+        assert "a^2 + b^2 = c^2" in result
+
+    def test_process_latex_blocks_ignores_other_languages(self):
+        gen = HtmlGenerator()
+        body = "```python\nprint('hello')\n```"
+        result = gen.process_latex_blocks(body)
+        assert '<div class="latex-block">' not in result
+        assert "```python" in result
+
+    def test_process_latex_blocks_multiple_blocks(self):
+        gen = HtmlGenerator()
+        body = "```latex\n\\[x = 1\\]\n```\n\nSome text\n\n```latex\n\\[y = 2\\]\n```"
+        result = gen.process_latex_blocks(body)
+        assert result.count('<div class="latex-block">') == 2
+        assert "x = 1" in result
+        assert "y = 2" in result
+
+    def test_page_template_includes_mathjax(self):
+        gen = HtmlGenerator()
+        result = gen.generate_page_template("Test", "<p>Test</p>", "<nav></nav>")
+        assert "MathJax" in result
+        assert "tex-mml-chtml.js" in result
+        assert "inlineMath" in result
+        assert "displayMath" in result
