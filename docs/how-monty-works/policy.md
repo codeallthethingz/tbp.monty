@@ -105,7 +105,8 @@ The curvature-informed surface-agent policy is designed to follow the principal 
 
 To enable this, the policy is informed by the principal curvature information available from the sensor-module. It will alternate between following the minimal curvature (e.g. the rim of a cup) and the maximal curvature (e.g. the curved side of a cylinder). The decision process that guides the curvature-guided policy is elaborated in plain English in the below chart), and in more coding-terminology in Figure TODO.
 
-> 🚧 TODO: add a figure for coding-terminology chart
+> [!WARNING]
+> TODO: add a figure for coding-terminology chart
 
 **Avoidance of previous locations**: In addition to being guided by curvature, the policy has the ability to check whether the direction in which it is heading will bring it back to a previously visited location; if so, it will attempt to find a new heading that is more likely to explore a new region of the object. Some further points on this are:
 

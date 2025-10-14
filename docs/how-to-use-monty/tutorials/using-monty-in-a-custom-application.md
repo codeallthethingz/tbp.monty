@@ -1,7 +1,9 @@
 ---
 title: Using Monty in a Custom Application
 ---
-> ⚠️ This is an Advanced Tutorial
+> [!WARNING]
+> This is an Advanced Tutorial
+> 
 > If you've arrived at this page and you're relatively new to Monty, then we would recommend you start by reading some of our other documentation first. Once you're comfortable with the core concepts of Monty, then we think you'll enjoy learning about how to apply it to custom applications in the following tutorial!
 
 # Introduction
@@ -10,17 +12,21 @@ Monty aims to implement a **general-purpose algorithm for understanding and inte
 ## What Kind of Applications can Monty Be Used For?
 **Monty is a sensorimotor modeling system. It is NOT made for learning from static datasets** (although some can be framed to introduce movement, such as the Omniglot example below). Any application where you want to use Monty should have some concept of movement and how movement will change the state of the agent and what is being observed.
 
-> ⚠️ Monty Currently Expects Movement to be in 3D Euclidean Space
-In the current implementation, movement should happen in 3D (or less) space and be tracked using Euclidean location coordinates. Although we are convinced that the basic principles of Monty will also apply to abstract spaces ([potentially embedded in 3D space](https://thousandbrains.discourse.group/t/abstract-concept-in-monty/533/4)) and we know that the [brain uses different mechanisms to encode space](https://youtu.be/zRRazfFstvY), the current implementation relies on 3D Euclidean space.
+> [!WARNING]
+> Monty Currently Expects Movement to be in 3D Euclidean Space
+>
+> In the current implementation, movement should happen in 3D (or less) space and be tracked using Euclidean location coordinates. Although we are convinced that the basic principles of Monty will also apply to abstract spaces ([potentially embedded in 3D space](https://thousandbrains.discourse.group/t/abstract-concept-in-monty/533/4)) and we know that the [brain uses different mechanisms to encode space](https://youtu.be/zRRazfFstvY), the current implementation relies on 3D Euclidean space.
 
 # Customizing Monty for Your Application
 The diagram below shows the base abstract classes in Monty. For general information on how to customize those classes, see our guide on [Customizing Monty](../customizing-monty.md).
 The Experiment class coordinates the experiment (learning and evaluation). It initializes and controls Monty and the environment and coordinates the interaction between them.
 The `EmbodiedEnvironment` class is wrapped in a DataSet class, which can be accessed using a DataLoader. An experiment can have two data loaders associated with it: one for training and one for evaluation.
 
-> ⚠️ Subject to Change in the Near Future
- The use of `DataSet` and `DataLoader` follows common PyTorch conventions. However, since Monty is not made for static datasets, we plan to refactor this to be more analogous to environment interfaces used, for instance, in reinforcement learning.
- Additionally, we are working on cleaning up the data access between the motor system, data loader, and dataset (grey arrows).
+> [!WARNING]
+> Subject to Change in the Near Future
+>
+> The use of `DataSet` and `DataLoader` follows common PyTorch conventions. However, since Monty is not made for static datasets, we plan to refactor this to be more analogous to environment interfaces used, for instance, in reinforcement learning.
+> Additionally, we are working on cleaning up the data access between the motor system, data loader, and dataset (grey arrows).
 
 ![Class structure in tbp.monty. Each class can be customized independently, allowing for easy modification and testing of individual components.](../../figures/how-to-use-monty/monty_class_diagram.png#width=500px)
 
@@ -190,7 +196,9 @@ omniglot_inference = dict(
 )
 ```
 
-> 📘 Follow Along
+> [!NOTE]
+> Follow Along
+> 
 > To run the above experiment, you first need to download the [Omniglot dataset](https://github.com/brendenlake/omniglot). You can do this by running `cd ~/tbp/data` and `git clone https://github.com/brendenlake/omniglot.git`. You will need to unzip the `omniglot/python/images_background.zip` and `omniglot/python/strokes_background.zip` files.
 
 To test this, go ahead and copy the configs above into the `benchmarks/configs/my_experiments.py` file. To complete the configs, you will need to add the following imports, sensor module config and model_path at the top of the file.
@@ -269,7 +277,9 @@ And add the two experiments into the `MyExperiment` class in `benchmarks/configs
 
 Now you can run training by calling `python benchmarks/run.py -e omniglot_training` and then inference on these models by calling `python benchmarks/run.py -e omniglot_inference`. You can check the `eval_stats.csv` file in `~/tbp/results/monty/projects/monty_runs/omniglot_inference/` to see how Monty did. If you copied the code above, it should have recognized all six characters correctly.
 
-> ❗️ Generalization Performance on Omniglot is Bad Without Hierarchy
+> [!CAUTION]
+> Generalization Performance on Omniglot is Bad Without Hierarchy
+> 
 > Note that we currently don't get good generalization performance on the Omniglot dataset. If you use the commented-out dataset_args (`eval_dataloader_args=OmniglotDataloaderArgs(versions=[2, 2, 2, 2, 2, 2])`) in the inference config, which shows previously unseen versions of the characters, you will see that performance degrades a lot. This is because the Omniglot characters are fundamentally compositional objects (strokes relative to each other), and compositional objects can only be modeled by stacking two learning modules hierarchically. The above configs do not do this. Our research team is hard at work getting Monty to model compositional objects.
  
 ## Example 2: Monty Meets World
@@ -335,7 +345,9 @@ monty_meets_world_2dimage_inference = dict(
 ```
 For more configs to test on different subsets of the Monty Meets World dataset (such as bright or dark images, hand intrusion, and multiple objects), you can find all RGBD image benchmark configs [here](../../../benchmarks/configs/monty_world_experiments.py).
 
-> 📘 Follow Along
+> [!NOTE]
+> Follow Along
+> 
 > To run this experiment, you first need to download our 2D image dataset called `worldimages`. You can find instructions for this [here](https://thousandbrainsproject.readme.io/docs/benchmark-experiments#monty-meets-world).
 >
 > You will also need to [download the pre-trained models](https://thousandbrainsproject.readme.io/docs/getting-started#42-download-pretrained-models). Alternatively, you can run pre-training yourself by running `python benchmarks/run.py -e only_surf_agent_training_numenta_lab_obj`. Running pre-training requires the Habitat simulator and [downloading the `numenta_lab` 3D mesh dataset](https://thousandbrainsproject.readme.io/docs/benchmark-experiments#monty-meets-world).

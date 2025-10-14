@@ -43,7 +43,8 @@ There are many ways of visualizing the logged data. Below are just some commonly
 
 The easiest way to load logged data is using the `load_stats` function. This function is useful if you use the `DetailedJSONHandler` or the `BasicCSVStatsHandler` or simply want to load learned models. You can use the function parameters to load only some of the stats selectively. For example, set `load_detailed` to `False` if you didn't collect detailed stats in a JSON file or set `load_train` to `False` if you only ran validation.
 
-> 👍 You can Follow Along with this Code
+> [!TIP]
+> You can Follow Along with this Code
 >
 > If you ran the `randrot_10distinctobj_surf_agent` benchmark experiment as described in the [Running Benchmarks](running-benchmarks.md) guide, you should be able to run the code below.
 
@@ -69,7 +70,8 @@ train_stats, eval_stats, detailed_stats, lm_models = load_stats(exp_path,
 
 Alternatively, you can of course always just load the stats files (logged at `output_dir` specified in the experiment config) using `pd.read_csv`, `json.load`, `torch.load`, or any other library loading function you prefer using.
 
-> 📘 JSON Logs can get Large Fast
+> [!NOTE]
+> JSON Logs can get Large Fast
 >
 > The detailed JSON logs save very detailed information for every step and episode. This includes for example the pixel observations at every step. The .json files can therefore get large very quickly. You should use the `DetailedJSONHandler` with care and only if needed. Remember to adjust the number of epochs and episodes to be as small as possible.
 >
@@ -90,7 +92,8 @@ from tbp.monty.frameworks.utils.logging_utils import print_unsupervised_stats
 print_unsupervised_stats(train_stats, epoch_len=10)
 ```
 
-> 👍 If you are Following Along you Should see Something like This:
+> [!TIP]
+> If you are Following Along you Should see Something like This:
 >
 > `Detected 100.0% correctly
 > overall run time: 104.03 seconds (1.73 minutes), 1.04 seconds per episode, 0.04 seconds per step.`
@@ -120,7 +123,8 @@ plt.show()
 ![](../figures/how-to-use-monty/mug_graph_plot.png)
 
 
-> 📘 Plotting in 3D
+> [!NOTE]
+> Plotting in 3D
 >
 > Most plots shown here use the 3D projection feature of matplotlib. The plots can be viewed interactively by dragging the mouse over them to zoom and rotate. When you want to save figures with 3D plots programmatically, it can be useful to set the `rotation` parameter in the `plot_graph` function such that the POV provides a good view of the 3D structure of the object.
 
@@ -128,7 +132,8 @@ plt.show()
 
 Since Monty is a sensorimotor framework, everything happens as a timeseries of sensing and acting. Therefor, many aspects of the experiment are better visualized as an animation that can show how hypotheses evolve over time. We have a couple of functions to create animations in the `plot_utils.py` file. Below is one example how this could be applied to data loaded with the code above.
 
-> 📘 To Follow Along Here You Need to Use the Detailed Logger
+> [!NOTE]
+> To Follow Along Here You Need to Use the Detailed Logger
 >
 > Detailed JSON stats are not logged by default since they can get large quickly. To be able to run the following analysis, you need to update the experiment config with this line:
 >
@@ -154,7 +159,8 @@ Since Monty is a sensorimotor framework, everything happens as a timeseries of s
 > ),
 > ```
 
-> 🚧 TODO: Add code for some of the animate functions
+> [!WARNING]
+> TODO: Add code for some of the animate functions
 >
 > Most of them are for the old LMs so probably won't make sense to show them here. Maybe we should even remove them from the code.
 >

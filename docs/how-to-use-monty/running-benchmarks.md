@@ -24,7 +24,8 @@ and replace `run_name` with the name of the benchmark experiment. All benchmark 
 python benchmarks/run.py -e randrot_10distinctobj_surf_agent
 ```
 
-> 👍 Go Ahead and Run the Command Above!
+> [!TIP]
+> Go Ahead and Run the Command Above!
 > 
 > If you run the `randrot_10distinctobj_surf_agent` experiment using the command above, you will be able to follow along with all the following data analysis guides since we use this as an example.
 > 
@@ -33,7 +34,8 @@ python benchmarks/run.py -e randrot_10distinctobj_surf_agent
 
 # How to Report the Benchmark Performance
 
-> 🚧 TODO: Figure out a way to have timings comparable
+> [!WARNING]
+> TODO: Figure out a way to have timings comparable
 > 
 > Currently we run all benchmark experiments on our cloud infrastructure, using 16 CPUs. However, external people will not have access to this and their hardware may give very different runtimes. How do we deal with this?
 

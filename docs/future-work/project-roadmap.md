@@ -42,7 +42,8 @@ Once you have a concrete idea of how you would like to tackle a task (whether it
 
 **Once your RFC is merged and active, we will add a player icon for you on the table** (using your GitHub or discourse profile picture). This way we can keep an overview of which parts of the code people are currently working on. If you decide not to pursue the implementation further, please notify us so that someone else can pick up the task.
 
-> 📘 More Ways to Contribute
+> [!NOTE]
+> More Ways to Contribute
 >
 > Besides these more involved and research/code heavy tasks on our roadmap, there are many other ways you can get involved and support this project. Check out our page on [ways to contribute](../contributing/ways-to-contribute-to-code.md) to find out what best matches your skillset and interests.
 
