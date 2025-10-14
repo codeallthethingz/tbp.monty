@@ -219,7 +219,6 @@ article li {
 article code {
     background-color: #f8f9fa;
     padding: 2px 6px;
-    border-radius: 3px;
     font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
     font-size: 0.9em;
     color: #e74c3c;
@@ -228,10 +227,10 @@ article code {
 article pre {
     background-color: #f8f9fa;
     padding: 1rem;
-    border-radius: 5px;
     overflow-x: auto;
     margin-bottom: 1rem;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid #95a5a6;
+    border-radius: 0 10px 10px 0;
 }
 
 article pre code {
@@ -248,7 +247,6 @@ article pre code {
     background-color: #34495e;
     color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
     font-size: 0.8rem;
     opacity: 0.7;
@@ -327,8 +325,9 @@ article figcaption {
 .note, .tip, .important, .warning, .caution {
     padding: 1rem;
     margin: 1.5rem 0;
-    border-radius: 5px;
+    border-radius: 0 10px 10px 0;
     border-left: 4px solid;
+    word-wrap: break-word;
 }
 
 .note {
@@ -391,9 +390,9 @@ blockquote {
 .latex-block {
     background-color: #f8f9fa;
     padding: 1.5rem;
-    border-radius: 5px;
     margin: 1.5rem 0;
     border-left: 4px solid #9b59b6;
+    border-radius: 0 10px 10px 0;
     overflow-x: auto;
 }
 

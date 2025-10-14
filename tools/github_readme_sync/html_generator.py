@@ -146,19 +146,49 @@ class HtmlGenerator:
         return re.sub(REGEX_MARKDOWN_PATH, replace_path, body)
 
     def convert_note_tags(self, body: str) -> str:
-        conversions = {
-            r"\[!NOTE\]": '<div class="note">📘 <strong>Note:</strong>',
-            r"\[!TIP\]": '<div class="tip">👍 <strong>Tip:</strong>',
-            r"\[!IMPORTANT\]": '<div class="important">📘 <strong>Important:</strong>',
-            r"\[!WARNING\]": '<div class="warning">🚧 <strong>Warning:</strong>',
-            r"\[!CAUTION\]": '<div class="caution">❗️ <strong>Caution:</strong>',
+        tag_classes = {
+            r"\[!NOTE\]": ("note", "📘 <strong>Note:</strong>"),
+            r"\[!TIP\]": ("tip", "👍 <strong>Tip:</strong>"),
+            r"\[!IMPORTANT\]": ("important", "📘 <strong>Important:</strong>"),
+            r"\[!WARNING\]": ("warning", "🚧 <strong>Warning:</strong>"),
+            r"\[!CAUTION\]": ("caution", "❗️ <strong>Caution:</strong>"),
         }
 
-        for old, new in conversions.items():
-            body = re.sub(old, new, body)
-            body = re.sub(r"(</div>.*?)(\n\n|$)", r"\1</div>\2", body)
+        pattern = r"^((?:>.*\n?)+)"
+        blocks = re.split(pattern, body, flags=re.MULTILINE)
 
-        return body
+        result = []
+        for block in blocks:
+            if block.startswith(">"):
+                lines = block.split("\n")
+                first_line = lines[0] if lines else ""
+
+                converted = False
+                for tag_pattern, (css_class, header) in tag_classes.items():
+                    if re.search(tag_pattern, first_line):
+                        content_lines = []
+                        for line in lines:
+                            clean_line = re.sub(r"^> ?", "", line)
+                            clean_line = re.sub(tag_pattern, "", clean_line)
+                            content_lines.append(clean_line)
+
+                        if content_lines:
+                            content = "\n".join(content_lines).strip()
+                            content_html = self.markdown_to_html(content)
+                            div_html = (
+                                f'<div class="{css_class}">\n'
+                                f"{header}\n{content_html}\n</div>"
+                            )
+                            result.append(div_html)
+                            converted = True
+                            break
+
+                if not converted:
+                    result.append(block)
+            else:
+                result.append(block)
+
+        return "".join(result)
 
     def parse_images(self, markdown_text: str) -> str:
         def replace_image(match):

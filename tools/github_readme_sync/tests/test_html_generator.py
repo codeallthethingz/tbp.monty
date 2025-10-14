@@ -39,9 +39,28 @@ class TestHtmlGenerator:
 
     def test_convert_note_tags(self):
         gen = HtmlGenerator()
-        body = "[!NOTE] This is important"
+        body = "> [!NOTE]\n> This is important"
         result = gen.convert_note_tags(body)
         assert '<div class="note">' in result
+        assert "This is important" in result
+
+    def test_convert_note_tags_multiple_blocks(self):
+        gen = HtmlGenerator()
+        body = "> [!NOTE]\n> First note\n\n> [!WARNING]\n> First warning"
+        result = gen.convert_note_tags(body)
+        assert result.count('<div class="note">') == 1
+        assert result.count('<div class="warning">') == 1
+        assert result.count("</div>") == 2
+        assert "First note" in result
+        assert "First warning" in result
+
+    def test_convert_note_tags_with_empty_lines(self):
+        gen = HtmlGenerator()
+        body = "> [!NOTE]\n> First line\n>\n> Second line after empty"
+        result = gen.convert_note_tags(body)
+        assert result.count('<div class="note">') == 1
+        assert "First line" in result
+        assert "Second line after empty" in result
 
     def test_generate_navigation_html(self):
         gen = HtmlGenerator()
