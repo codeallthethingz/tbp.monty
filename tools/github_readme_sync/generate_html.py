@@ -9,6 +9,8 @@
 # https://opensource.org/licenses/MIT.
 
 import logging
+import shutil
+from pathlib import Path
 
 from tools.github_readme_sync.colors import BLUE, CYAN, GREEN, RESET, WHITE
 from tools.github_readme_sync.hierarchy import check_hierarchy_file
@@ -25,7 +27,12 @@ def generate_html_docs(source_dir: str, output_dir: str = None):
 
     logging.info(f"{CYAN}Processing hierarchy...{RESET}")
 
-    generator.write_static_files()
+    html_assets_dir = Path(__file__).parent / "html_assets"
+    shutil.copytree(html_assets_dir, generator.output_dir, dirs_exist_ok=True)
+
+    highlight_css_path = Path(generator.css_dir) / "highlight.css"
+    with open(highlight_css_path, "w") as f:
+        f.write(generator.generate_highlight_css())
 
     generator.copy_assets(source_dir)
 
