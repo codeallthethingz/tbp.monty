@@ -8,7 +8,6 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT.
 
-import csv
 import html as html_module
 import logging
 import os
@@ -27,28 +26,21 @@ from pygments.util import ClassNotFound
 
 from tools.github_readme_sync.colors import CYAN, GREEN, RESET, WHITE
 from tools.github_readme_sync.constants import (
+    ALLOWED_CSS_PROPERTIES,
     IGNORE_IMAGES,
-    IGNORE_TABLES,
-    REGEX_CSV_TABLE,
+    REGEX_CLOUDINARY_VIDEO,
+    REGEX_CODE_BLOCK,
+    REGEX_IMAGE_PATH,
+    REGEX_IMAGES,
+    REGEX_MARKDOWN_PATH,
+    REGEX_YOUTUBE_LINK,
 )
-
-regex_images = re.compile(r"!\[(.*?)\]\((.*?)\)")
-regex_image_path = re.compile(
-    r"(\.\./){1,5}figures/((.+)\.(png|jpg|jpeg|gif|svg|webp))"
+from tools.github_readme_sync.md import (
+    convert_csv_to_html_table as convert_csv_table_util,
 )
-regex_markdown_path = re.compile(r"\(([\./]*)([\w\-/]+)\.md(#.*?)?\)")
-regex_cloudinary_video = re.compile(
-    r"\[(.*?)\]\((https://res\.cloudinary\.com/([^/]+)/video/upload/v(\d+)/([^/]+\.mp4))\)",
-    re.IGNORECASE,
+from tools.github_readme_sync.md import (
+    insert_markdown_snippet as insert_snippet_util,
 )
-regex_youtube_link = re.compile(
-    r"\[(.*?)\]\((https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})(?:[&?][^\)]*)?)\)",
-    re.IGNORECASE,
-)
-regex_markdown_snippet = re.compile(r"!snippet\[(.*?)\]")
-regex_code_block = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
-
-ALLOWED_CSS_PROPERTIES = {"width", "height"}
 
 
 class HtmlGenerator:
@@ -106,82 +98,17 @@ class HtmlGenerator:
                 pass
 
             if lexer:
-                formatter = HtmlFormatter(
-                    cssclass="highlight", noclasses=False
-                )
+                formatter = HtmlFormatter(cssclass="highlight", noclasses=False)
                 highlighted = highlight(code, lexer, formatter)
                 return highlighted
 
             escaped_code = html_module.escape(code)
-            return (
-                f'<pre><code class="language-{language}">'
-                f"{escaped_code}</code></pre>"
-            )
+            return f'<pre><code class="language-{language}">{escaped_code}</code></pre>'
 
-        return regex_code_block.sub(replace_code, markdown_text)
+        return REGEX_CODE_BLOCK.sub(replace_code, markdown_text)
 
     def convert_csv_to_html_table(self, body: str, file_path: str) -> str:
-        def replace_match(match):
-            csv_path = match.group(1)
-            table_name = os.path.basename(csv_path)
-            if table_name in IGNORE_TABLES:
-                return match.group(0)
-
-            csv_path = os.path.join(file_path, csv_path)
-            csv_path = os.path.normpath(csv_path)
-
-            try:
-                with open(csv_path, "r") as f:
-                    reader = csv.reader(f)
-                    headers = next(reader)
-                    rows = list(reader)
-
-                    unsafe_html = "<div class='data-table'><table>\n<thead>\n<tr>"
-
-                    alignments = {}
-                    for i, unparsed_header in enumerate(headers):
-                        title_attr = ""
-                        parts = [p.strip() for p in unparsed_header.split("|")]
-                        header = parts[0]
-
-                        for part in parts[1:]:
-                            if part.startswith("hover "):
-                                hover_text = html_module.escape(part[6:])
-                                title_attr = f" title='{hover_text}'"
-                            elif part.startswith("align "):
-                                align_value = part[6:]
-                                if align_value in ["left", "right"]:
-                                    escaped_align = html_module.escape(
-                                        align_value
-                                    )
-                                    alignments[i] = (
-                                        f" style='text-align:{escaped_align}'"
-                                    )
-                        unsafe_html += f"<th{title_attr}>{header}</th>"
-                    unsafe_html += "</tr>\n</thead>\n<tbody>\n"
-
-                    for row in rows:
-                        unsafe_html += "<tr>"
-                        for i, cell in enumerate(row):
-                            align_style = alignments.get(i, "")
-                            unsafe_html += f"<td{align_style}>{cell}</td>"
-                        unsafe_html += "</tr>\n"
-
-                    unsafe_html += "</tbody>\n</table></div>"
-
-                    return nh3.clean(
-                        unsafe_html,
-                        attributes={
-                            "div": {"class"},
-                            "th": {"title", "style"},
-                            "td": {"style"},
-                        },
-                    )
-
-            except Exception as e:  # noqa: BLE001
-                return f"[Failed to load table from {csv_path} - {e}]"
-
-        return REGEX_CSV_TABLE.sub(replace_match, body)
+        return convert_csv_table_util(body, file_path)
 
     def correct_image_locations(self, body: str) -> str:
         new_body = body
@@ -197,7 +124,7 @@ class HtmlGenerator:
             img_tag = match.group(0)
             src = match.group(1)
             if "../figures/" in src:
-                image_path = re.search(regex_image_path, src)
+                image_path = re.search(REGEX_IMAGE_PATH, src)
                 if image_path:
                     image_filename = image_path.group(2)
                     if image_filename not in IGNORE_IMAGES:
@@ -205,7 +132,7 @@ class HtmlGenerator:
                         new_img_tag = img_tag.replace(src, new_src)
                         new_body = new_body.replace(img_tag, new_img_tag)
 
-        new_body = re.sub(regex_image_path, replace_image_path, new_body)
+        new_body = re.sub(REGEX_IMAGE_PATH, replace_image_path, new_body)
         return new_body
 
     def correct_file_locations(self, body: str) -> str:
@@ -215,7 +142,7 @@ class HtmlGenerator:
             fragment = match.group(3) or ""
             return f"({slug}.html{fragment})"
 
-        return re.sub(regex_markdown_path, replace_path, body)
+        return re.sub(REGEX_MARKDOWN_PATH, replace_path, body)
 
     def convert_note_tags(self, body: str) -> str:
         conversions = {
@@ -265,8 +192,7 @@ class HtmlGenerator:
                 )
             else:
                 unsafe_html = (
-                    f'<figure><img src="{clean_src}" style="{style}" />'
-                    f"</figure>"
+                    f'<figure><img src="{clean_src}" style="{style}" /></figure>'
                 )
 
             return nh3.clean(
@@ -278,7 +204,7 @@ class HtmlGenerator:
                 },
             )
 
-        return regex_images.sub(replace_image, markdown_text)
+        return REGEX_IMAGES.sub(replace_image, markdown_text)
 
     def convert_cloudinary_videos(self, markdown_text: str) -> str:
         def replace_video(match):
@@ -294,7 +220,7 @@ class HtmlGenerator:
                 f"Your browser does not support the video tag.</video></div>"
             )
 
-        return regex_cloudinary_video.sub(replace_video, markdown_text)
+        return REGEX_CLOUDINARY_VIDEO.sub(replace_video, markdown_text)
 
     def convert_youtube_videos(self, markdown_text: str) -> str:
         def replace_youtube(match):
@@ -312,26 +238,13 @@ class HtmlGenerator:
                 f'title="{escaped_title}" '
                 f'frameborder="0" '
                 f'allow="{allow_attr}" '
-                f'allowfullscreen></iframe></div>'
+                f"allowfullscreen></iframe></div>"
             )
 
-        return regex_youtube_link.sub(replace_youtube, markdown_text)
+        return REGEX_YOUTUBE_LINK.sub(replace_youtube, markdown_text)
 
     def insert_markdown_snippet(self, body: str, file_path: str) -> str:
-        def replace_match(match):
-            snippet_path = os.path.join(file_path, match.group(1))
-            snippet_path = os.path.normpath(snippet_path)
-
-            try:
-                with open(snippet_path, "r") as f:
-                    return f.read()
-            except Exception:  # noqa: BLE001
-                snippet_error = (
-                    f"[File not found or could not be read: {snippet_path}]"
-                )
-                return snippet_error
-
-        return regex_markdown_snippet.sub(replace_match, body)
+        return insert_snippet_util(body, file_path)
 
     def add_heading_anchors(self, html_content: str) -> str:
         def add_anchor(match):
@@ -348,9 +261,7 @@ class HtmlGenerator:
         pattern = r"<(h[1-6])>(.*?)</h[1-6]>"
         return re.sub(pattern, add_anchor, html_content)
 
-    def generate_navigation_html(
-        self, hierarchy: list, current_slug: str = ""
-    ) -> str:
+    def generate_navigation_html(self, hierarchy: list, current_slug: str = "") -> str:
         nav_html = (
             '<nav class="sidebar"><div class="nav-header">Documentation'
             '</div><ul class="nav-list">'
@@ -447,12 +358,20 @@ class HtmlGenerator:
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, \
 Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
     color: #333;
     background-color: #f5f5f5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    scroll-margin-top: 20px;
 }
 
 .sidebar {
@@ -948,11 +867,20 @@ blockquote {
                 updateActiveNavState(pathname);
                 addCopyButtons();
                 
-                const content = document.querySelector('.content');
-                if (content) {
-                    content.scrollTop = 0;
+                const urlObj = new URL(url, window.location.origin);
+                if (urlObj.hash) {
+                    setTimeout(() => {
+                        const targetId = urlObj.hash.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({behavior: 'auto'});
+                        } else {
+                            window.scrollTo(0, 0);
+                        }
+                    }, 50);
+                } else {
+                    window.scrollTo(0, 0);
                 }
-                window.scrollTo(0, 0);
             })
             .catch(error => {
                 console.error('Failed to load page:', error);
@@ -964,11 +892,38 @@ blockquote {
         if (!link) return;
         
         const href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:')) {
+        if (!href) return;
+        
+        if (href.startsWith('http') || href.startsWith('mailto:')) {
             return;
         }
         
-        if (href.endsWith('.html')) {
+        if (href.startsWith('#')) {
+            e.preventDefault();
+            const targetId = href.substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({behavior: 'smooth'});
+                history.replaceState(null, '', href);
+            }
+            return;
+        }
+        
+        if (href.includes('#')) {
+            const [page, hash] = href.split('#');
+            const currentPage = window.location.pathname.split('/').pop();
+            if (!page || page === currentPage) {
+                e.preventDefault();
+                const targetElement = document.getElementById(hash);
+                if (targetElement) {
+                    targetElement.scrollIntoView({behavior: 'smooth'});
+                    history.replaceState(null, '', '#' + hash);
+                }
+                return;
+            }
+        }
+        
+        if (href.endsWith('.html') || href.includes('.html#')) {
             e.preventDefault();
             loadPage(href);
         }
@@ -983,19 +938,27 @@ blockquote {
         }
     });
 
-    history.replaceState({ url: window.location.pathname }, '', window.location.pathname);
+    history.replaceState({ url: window.location.href }, '', window.location.href);
 
     expandPathToCurrentPage();
     addCopyButtons();
+    
+    if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            setTimeout(() => {
+                targetElement.scrollIntoView({behavior: 'auto'});
+            }, 0);
+        }
+    }
 });
 """
 
     def copy_assets(self, source_docs_dir: str):
         figures_dir = os.path.join(source_docs_dir, "figures")
         if os.path.exists(figures_dir):
-            logging.info(
-                f"{CYAN}Copying assets from {figures_dir}...{RESET}"
-            )
+            logging.info(f"{CYAN}Copying assets from {figures_dir}...{RESET}")
             for root, _dirs, files in os.walk(figures_dir):
                 for file in files:
                     if file.lower().endswith(
@@ -1034,9 +997,7 @@ blockquote {
         category_slug: str,
         breadcrumbs: list = None,
     ) -> str:
-        doc_file_path = os.path.join(
-            file_path, category_slug, f"{doc['slug']}.md"
-        )
+        doc_file_path = os.path.join(file_path, category_slug, f"{doc['slug']}.md")
 
         if not os.path.exists(doc_file_path):
             logging.error(f"File not found: {doc_file_path}")
@@ -1048,9 +1009,7 @@ blockquote {
         if raw_content.startswith("---"):
             _, frontmatter_str, body = raw_content.split("---", 2)
             frontmatter = yaml.safe_load(frontmatter_str)
-            title = frontmatter.get(
-                "title", doc["slug"].replace("-", " ").title()
-            )
+            title = frontmatter.get("title", doc["slug"].replace("-", " ").title())
         else:
             body = raw_content
             title = doc["slug"].replace("-", " ").title()
@@ -1130,4 +1089,3 @@ blockquote {
 
         logging.info(f"{GREEN}Index page generated from first doc{RESET}")
         return output_file
-

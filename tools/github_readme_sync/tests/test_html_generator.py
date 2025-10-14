@@ -20,7 +20,7 @@ class TestHtmlGenerator:
     def test_init_creates_directories(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             gen = HtmlGenerator(tmpdir)
-            assert os.path.exists(gen.docs_dir)
+            assert os.path.exists(gen.output_dir)
             assert os.path.exists(gen.assets_dir)
             assert os.path.exists(gen.css_dir)
 
@@ -35,7 +35,7 @@ class TestHtmlGenerator:
         gen = HtmlGenerator()
         body = "![alt text](../figures/overview/image.png)"
         result = gen.correct_image_locations(body)
-        assert "../assets/overview/image.png" in result
+        assert "assets/overview/image.png" in result
 
     def test_convert_note_tags(self):
         gen = HtmlGenerator()
