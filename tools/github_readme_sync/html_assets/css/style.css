@@ -402,3 +402,8 @@ mjx-container {
     overflow-y: hidden;
 }
 
+/* Hide table header for books table - targets table containing book cover images */
+article table:has(img[src*="books/thousand-brains"]) thead {
+    display: none;
+}
+
