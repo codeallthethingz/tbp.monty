@@ -343,7 +343,8 @@ class HtmlGenerator:
         indent_class = f"indent-{level}" if level > 0 else ""
 
         html_content = f'<li class="{indent_class}" data-slug="{slug}">'
-        title_text = slug.replace("-", " ").title()
+        # Use title from frontmatter if available, otherwise generate from slug
+        title_text = doc.get("title", slug.replace("-", " ").title())
         escaped_title = html_module.escape(title_text)
 
         if has_children:

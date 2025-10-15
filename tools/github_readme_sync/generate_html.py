@@ -71,8 +71,10 @@ def process_category_children(
     path_prefix: str = "",
 ):
     for child in parent.get("children", []):
+        # Use title from frontmatter if available, otherwise use slug
+        breadcrumb_title = child.get("title", child["slug"])
         current_breadcrumbs = breadcrumbs + [
-            (child["slug"], f"{child['slug']}.html")
+            (breadcrumb_title, f"{child['slug']}.html")
         ]
 
         generator.generate_document(

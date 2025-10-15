@@ -26,6 +26,7 @@ from tools.github_readme_sync.constants import (
     REGEX_CSV_TABLE,
 )
 from tools.github_readme_sync.file import find_markdown_files, read_file_content
+from tools.github_readme_sync.md import parse_frontmatter
 
 HIERARCHY_FILE = "hierarchy.md"
 CATEGORY_PREFIX = "# "
@@ -113,6 +114,14 @@ def check_hierarchy_file(folder: str):
             full_path = (
                 os.path.join(folder, *(el["slug"] for el in parent_stack)) + ".md"
             )
+            
+            # Extract title from frontmatter
+            if os.path.exists(full_path):
+                content = read_file_content(full_path)
+                frontmatter = parse_frontmatter(content)
+                if frontmatter and "title" in frontmatter:
+                    new_doc["title"] = frontmatter["title"]
+            
             errors = sanity_check(full_path)
             if errors:
                 link_check_errors.extend(errors)
