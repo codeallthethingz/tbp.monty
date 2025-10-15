@@ -21,5 +21,21 @@ IGNORE_EXTERNAL_URLS = [
     "sciencedirect.com",
 ]
 
-# Regex for CSV table references
+ALLOWED_CSS_PROPERTIES = {"width", "height"}
+
 REGEX_CSV_TABLE = re.compile(r"!table\[(.+?)\]")
+REGEX_IMAGES = re.compile(r"!\[(.*?)\]\((.*?)\)")
+REGEX_IMAGE_PATH = re.compile(
+    r"(\.\./){1,5}figures/((.+)\.(png|jpg|jpeg|gif|svg|webp))"
+)
+REGEX_MARKDOWN_PATH = re.compile(r"\(([\./]*)([\w\-/]+)\.md(#.*?)?\)")
+REGEX_CLOUDINARY_VIDEO = re.compile(
+    r"\[(.*?)\]\((https://res\.cloudinary\.com/([^/]+)/video/upload/v(\d+)/([^/]+\.mp4))\)",
+    re.IGNORECASE,
+)
+REGEX_YOUTUBE_LINK = re.compile(
+    r"\[(.*?)\]\((https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})(?:[&?][^\)]*)?)\)",
+    re.IGNORECASE,
+)
+REGEX_MARKDOWN_SNIPPET = re.compile(r"!snippet\[(.*?)\]")
+REGEX_CODE_BLOCK = re.compile(r"```([^\n]*)?\n(.*?)```", re.DOTALL)

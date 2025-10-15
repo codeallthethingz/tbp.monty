@@ -1,7 +1,8 @@
 ---
 title: Documentation
 ---
-> 📘 This page is about contributing Documentation
+> [!NOTE]
+> This page is about contributing Documentation
 >
 > For current Documentation see [Getting Started](../how-to-use-monty/getting-started.md)
 
@@ -9,7 +10,8 @@ title: Documentation
 
 Our documentation is held in Markdown files in the Monty repo under the [`/docs` folder](https://github.com/thousandbrainsproject/tbp.monty/tree/main/docs/). This documentation is synchronized to readme.com for viewing whenever a change is made. The order of sections, documents, and subdocuments is maintained by a hierarchy file called `/docs/hierarchy.md`. This is a fairly straightforward Markdown document that is used to tell readme how to order the categories, documents and sub-documents.
 
-> 📘 Edits to the documentation need to be submitted in the form of PRs to the Monty repository.
+> [!NOTE]
+> Edits to the documentation need to be submitted in the form of PRs to the Monty repository.
 
 # Linting
 
@@ -76,14 +78,15 @@ title: 'New Placeholder Example Doc'
 # My first heading
 ```
 
-> 🚧 Quotes
+> [!WARNING]
+> **Quotes**
 >
->Please put the title in single quotes and, if applicable, escape any single quotes using two single quotes in a row.
-Example: `title: 'My New Doc''s'`
+> Please put the title in single quotes and, if applicable, escape any single quotes using two single quotes in a row. Example: `title: 'My New Doc''s'`
 
-> 🚧 Your title must match the URL-safe slug
+> [!WARNING]
+> **Your title must match the URL-safe slug**
 >
->If your title is `My New Doc's` then your file name should be `my-new-docs.md`
+> If your title is `My New Doc's` then your file name should be `my-new-docs.md`
 
 Continue with the [Pull Requests](pull-requests.md) process.
 
@@ -113,7 +116,8 @@ If you are changing the parent path of a document (i.e., sub-page -> page, or pa
 
 Continue with the [Pull Requests](pull-requests.md) process.
 
-> 🚧 You cannot reorder categories as the readme.com API does not support this.
+> [!WARNING]
+> You cannot reorder categories as the readme.com API does not support this.
 >
 > Changes to the category order should be done in the readme.com UI and reflected in the `hierarchy.md` file.
 
@@ -158,9 +162,32 @@ python -m tools.github_readme_sync.cli check docs
 
 See the [Style Guide](style-guide.md#images) images section for details about creating and referencing images correctly.
 
+# Mathematical Notation
+
+This documentation supports LaTeX mathematical notation for expressing complex equations and formulas. You can use inline math like \(E = mc^2\) or display equations in blocks:
+
+```latex
+\[
+P(h|o) = \frac{P(o|h) \cdot P(h)}{P(o)}
+\]
+
+\[
+\mathbf{x}_{t+1} = f(\mathbf{x}_t, \mathbf{u}_t) + \mathbf{w}_t
+\]
+
+\[
+J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^{\infty} \gamma^t r_t\right]
+\]
+```
+
+The HTML documentation automatically renders LaTeX using MathJax. Use:
+- Inline math: `\(equation\)` 
+- Display math blocks: wrap equations in a `latex` code block with `\[equation\]`
+
 # VS Code Snippets
 
-> 👍 You have access to VS Code snippets
+> [!TIP]
+> You have access to VS Code snippets
 
 When you checkout the repository, you have access to markdown snippets for tables, code blocks, warnings and more.  While your cursor is in a markdown file, press `CMD + Shift + P` and select `Insert snippet` to select a desired documentation snippet.
 

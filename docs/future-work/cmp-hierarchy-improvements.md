@@ -13,6 +13,7 @@ These are the things we would like to implement:
 
 !snippet[../snippets/contributing-tasks.md]
 
-> 📘 Heterarchy vs. Hierarchy
+> [!NOTE]
+> Heterarchy vs. Hierarchy
 > 
 > We sometimes use the term heterarchy to express the notion that, similar to the brain, connections in Monty aren't always strictly hierarchical. There are many long-range connections (voting) within the same hierarchical level and across level, as well as skip-connections. Also, every level in the "hierarchy" has a motor output (goal state) that it sends to the motor system.

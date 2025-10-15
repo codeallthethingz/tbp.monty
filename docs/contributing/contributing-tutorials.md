@@ -1,7 +1,8 @@
 ---
 title: Contributing Tutorials
 ---
-> 📘 This page is about contributing Tutorials
+> [!NOTE]
+> This page is about contributing Tutorials
 > 
 > See [here](../how-to-use-monty/tutorials.md) for current tutorials.
 

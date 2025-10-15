@@ -1,7 +1,9 @@
 ---
 title: Using Monty for Robotics
 ---
-> ❗️ This is an Advanced Tutorial
+> [!CAUTION]
+> This is an Advanced Tutorial
+> 
 > If you've arrived at this page and you're relatively new to Monty, then we would recommend you start by reading some of our other documentation first. Once you're comfortable with the core concepts of Monty, then we think you'll enjoy learning about how to apply it to robotics in the following tutorial!
 
 # Introduction
@@ -26,7 +28,9 @@ Monty is configured to use the `SaccadeOnImageFromStreamDataLoader`. The data lo
 Note that in this example, we are not controlling any external actuators. All of Monty's movements happen virtually by moving a small patch over the larger image. In theory, there is nothing preventing Monty from streaming an action command back to the robot. However, in this case, there isn't an automated way to move an iPad in space. There could be an option to move the iPad manually and send this movement information to Monty along with the sensed image. However, this would require movement tracking of the iPad which was out of the scope of the five-day hackathon when we implemented this.
 ![Custom classes for object recognition in RGBD images streamed from an iOS app.](../../figures/how-to-use-monty/MMW_stream_custom_classes.png#width=500px)
 
-> 📘 Follow Along
+> [!NOTE]
+> Follow Along
+> 
 > If you would like to test the MontyMeetsWorld app, you can find code and run instructions [here](https://github.com/thousandbrainsproject/monty_lab/tree/main/monty_meets_world). To run the demo there are three main steps involved:
 > 1)  Open the MontyMeetsWorld project in XCode and run the iOS app on your iPad or iPhone (instructions in [this README](https://github.com/thousandbrainsproject/monty_lab/blob/main/monty_meets_world/README.md))
 > 2) Start a server on your laptop to listen for images streamed from the app by running `python src/tbp/monty/frameworks/environment_utils/server.py`
@@ -54,9 +58,10 @@ Monty can use three types of action output to recognize the sensed objects effic
 3) It can adjust the settings of the probe, such as depth of field and gain. These are not required for object recognition to work, but they can help make recognition more efficient and robust.
 
 
-> 📘 Follow Along
+> [!NOTE]
+> Follow Along
 > 
-> If you’re curious to see how this was set up, you can check out the [Ultrasound Perception repository](https://github.com/thousandbrainsproject/ultrasound_perception).
+> If you're curious to see how this was set up, you can check out the [Ultrasound Perception repository](https://github.com/thousandbrainsproject/ultrasound_perception).
 > See the videos and more pictures on the [showcase page](../../community/project-showcase.md#ultrasound_perception)
 
 # Example 3: LEGO-Based Robot
@@ -76,9 +81,10 @@ The core idea behind the project was to create a real robot that could explore t
 It was exciting to see Monty, originally tested in simulated environments, start to perceive and interact with the physical world in real time.
 
 
-> 📘 Follow Along
+> [!NOTE]
+> Follow Along
 > 
-> If you’re curious to see how this was set up, you can check out the [Everything Is Awesome repository](https://github.com/thousandbrainsproject/everything_is_awesome).
+> If you're curious to see how this was set up, you can check out the [Everything Is Awesome repository](https://github.com/thousandbrainsproject/everything_is_awesome).
 > We include the parts list, Raspberry Pi setup guides, custom `everything_is_awesome` classes and some project visualizations.
 > See the videos and more pictures on the [showcase page](../../community/project-showcase.md#lego-robot)
 

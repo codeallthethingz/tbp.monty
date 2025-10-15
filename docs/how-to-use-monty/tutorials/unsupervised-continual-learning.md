@@ -7,9 +7,10 @@ This tutorial demonstrates how to configure and run Monty experiments for [unsup
 
 Our model will have one surface agent connected to one sensor module connected to one learning module. Our dataset will be comprised of two objects in the [YCB](https://www.ycbbenchmarks.com/) dataset, and each will be shown at a different random rotation for each episode. Monty will see each object three times in total.
 
-> 📘 Don't have the YCB Dataset Downloaded?
+> [!NOTE]
+> Don't have the YCB Dataset Downloaded?
+> 
 > You can find instructions for downloading the YCB dataset [here](../getting-started.md#41-download-the-ycb-dataset).
->
 
 # Setting up the Experiment Config for Continual Learning
 

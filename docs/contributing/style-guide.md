@@ -147,28 +147,36 @@ Note that the CSV header row has bar separated syntax that allows you to specify
 Readme supports four color coded callouts
 
 ```
-> 👍 Something good
+> [!TIP]
+> Something good
 ```
 
-> 👍 Something good
+> [!TIP]
+> Something good
 
 ```
-> 📘 Information
+> [!NOTE]
+> Information
 ```
 
-> 📘 Information
+> [!NOTE]
+> Information
 
 ```
-> ⚠️ Warning
+> [!WARNING]
+> Warning
 ```
 
-> ⚠️ Warning
+> [!WARNING]
+> Warning
 
 ```
-> ❗️ Alert
+> [!CAUTION]
+> Alert
 ```
 
-> ❗️ Alert
+> [!CAUTION]
+> Alert
 
 ## Numbers
 

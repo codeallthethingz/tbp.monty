@@ -23,6 +23,7 @@ sys.path.append(str(monty_root))
 # the noqa: E402 comments
 from tools.github_readme_sync.colors import RED, RESET  # noqa: E402
 from tools.github_readme_sync.export import export  # noqa: E402
+from tools.github_readme_sync.generate_html import generate_html_docs  # noqa: E402
 from tools.github_readme_sync.hierarchy import (  # noqa: E402
     check_external,
     check_hierarchy_file,
@@ -97,6 +98,19 @@ def main():
     )
     index_parser.add_argument("output_file", help="Path to output data file")
 
+    # Generate HTML command
+    html_parser = subparsers.add_parser(
+        "generate-html", help="Generate static HTML documentation website"
+    )
+    html_parser.add_argument(
+        "folder", help="The docs directory containing hierarchy.md and markdown files"
+    )
+    html_parser.add_argument(
+        "--output",
+        help="Output directory for generated HTML (default: temp directory)",
+        default=None,
+    )
+
     args = parser.parse_args()
 
     initialize()
@@ -125,6 +139,9 @@ def main():
 
     elif args.command == "generate-index":
         generate_index(args.folder, args.output_file)
+
+    elif args.command == "generate-html":
+        generate_html_docs(args.folder, args.output)
 
 
 def check_readme_api_key():
