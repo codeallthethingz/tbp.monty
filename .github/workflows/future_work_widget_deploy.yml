@@ -86,3 +86,8 @@ jobs:
           # Second sync to delete any files that are no longer in the source directory.
           aws s3 sync "${{ runner.temp }}/future-work-widget/" s3://${{ secrets.FUTUREWORK_S3_BUCKET_NAME }}/
           aws s3 sync "${{ runner.temp }}/future-work-widget/" s3://${{ secrets.FUTUREWORK_S3_BUCKET_NAME }}/ --delete
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.FUTUREWORK_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
