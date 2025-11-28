@@ -7,7 +7,7 @@ concurrency:
 on:
   push:
     branches:
-      - main
+      - invalidate-cloudfront-cache
     paths:
       - 'docs/future-work/**'
       - 'docs/snippets/**'
