@@ -18,7 +18,7 @@ jobs:
   install_monty:
     name: install-monty
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'thousandbrainsproject' }}
+    # if: ${{ github.repository_owner == 'thousandbrainsproject' }}
     outputs:
       conda_env_cache_key_sha: ${{ steps.install_monty.outputs.conda_env_cache_key_sha }}
     steps:
@@ -36,7 +36,7 @@ jobs:
   future_work_widget_deploy:
     name: future-work-widget-deploy
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'thousandbrainsproject' }}
+    # if: ${{ github.repository_owner == 'thousandbrainsproject' }}
     needs:
       - install_monty
     steps:
