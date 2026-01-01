@@ -1,5 +1,5 @@
 ---
-title: Combine Dataloader and Dataset class into EnvironmentInterface
+title: Combine Dataloader and Dataset into Environment Interface
 description: Make the terminology we use clearer to understand that Monty learns in an environment and not from a static dataset.
 rfc: optional
 estimated-scope: medium

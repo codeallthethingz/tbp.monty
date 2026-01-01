@@ -1,5 +1,5 @@
 ---
-title: Re-Anchor Hypotheses for Robustness to Noise and Distortions
+title: Re-Anchor Hypotheses
 description: Reanchor hypothesized poses to nodes stored in model when salient features with high match are observed.
 rfc: required
 estimated-scope: large

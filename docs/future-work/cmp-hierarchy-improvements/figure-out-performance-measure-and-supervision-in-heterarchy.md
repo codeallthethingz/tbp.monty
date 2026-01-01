@@ -1,5 +1,5 @@
 ---
-title: Figure out Performance Measures and Supervision in Heterarchy
+title: Figure out Performance Measure and Supervision in Heterarchy
 description: Set up way to supervise LMs when learning compositional objects, as well as metrics to measure their performance.
 rfc: optional
 estimated-scope: medium

@@ -1,5 +1,5 @@
 ---
-title: Learn Policy using RL and Simplified Action Space
+title: Learn Policy using RL
 description: Test using reinforcement learning to learn policies.
 rfc: required
 estimated-scope: large

@@ -1,5 +1,5 @@
 ---
-title: Ways to Contribute
+title: Contributing
 ---
 
 Welcome, and thank you for your interest in contributing to Monty!
